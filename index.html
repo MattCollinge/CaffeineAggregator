@@ -1,0 +1,61 @@
+<!doctype html>
+<html>
+<head>
+    <title>Price Publishing Example</title>
+    <script src="/socket.io/socket.io.js"></script>
+    <script src='//code.jquery.com/jquery.min.js' charset='utf-8'></script>
+</head>
+<body>
+
+<p>
+    Prices will be published here...
+</p>
+
+<script>
+    function message(obj) {
+        $('#chat').append('<p><em>' + esc(obj) + '</em></p>');
+        // $('#chat').scrollTop = 1000000;
+//        var el = document.createElement('p');
+//        el.innerHTML = '<em>' + esc(obj) + '</em>';
+//        document.getElementById('chat').appendChild(el);
+        // document.getElementById('chat').scrollTop = 1000000;
+    }
+
+    var conn = io.connect('http://localhost:8083');
+    var sessionId;
+
+    function send(){
+        var val = document.getElementById('text').value;
+        conn.send(val);
+    }
+
+    function setSessionID() {
+        conn.emit('set nickname', 'blob');
+    }
+
+    function esc(msg){
+        return msg.replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    };
+
+    conn.on('message', function (obj) {
+        message(obj);
+    });
+
+    conn.on('sessionId', function(obj){
+        sessionId = obj;
+        message('Got sessionId from server:' + sessionId);
+    });
+
+    //setSessionID();
+</script>
+
+<div id="chat"></div>
+
+<style>
+    #chat { height: 200px; overflow: auto; width: 400px; border: 1px solid #eee; font: 13px Helvetica, Arial; }
+    #chat p { padding: 8px; margin: 0; }
+    #chat p:nth-child(odd) { background: #F6F6F6; }
+</style>
+
+</body>
+</html>
