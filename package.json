@@ -2,6 +2,10 @@
   "name": "CaffeineAggregator",
   "version": "0.0.0",
   "description": "CaffeineAggregator\r ==================",
+  "engines": {
+    "node": "0.8.x",
+    "npm":  "1.1.x"
+    },
   "main": "app.js",
   "dependencies": {
     "express": "~3.0.1",
