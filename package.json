@@ -1,0 +1,22 @@
+{
+  "name": "CaffeineAggregator",
+  "version": "0.0.0",
+  "description": "CaffeineAggregator\r ==================",
+  "main": "app.js",
+  "dependencies": {
+    "express": "~3.0.1",
+    "http": "~0.0.0",
+    "socket.io": "~0.9.11"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/mfloryan/CaffeineAggregator.git"
+  },
+  "author": "",
+  "license": "apache",
+  "readmeFilename": "README.md"
+}
