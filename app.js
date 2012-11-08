@@ -1,42 +1,33 @@
-var express = require('express');
-
-var http = require('http');
-var io = require('socket.io');
-var URL = require('url');
-var fs = require('fs');
+var app = require('express')();
+var server = require('http').createServer(app);
+var io = require('socket.io').listen(server);
 
 var publisher = {
     publish: function(){}
-}
-
-var app = express();
-server = http.createServer(app);
-
-var socketioserver = io.listen(server);
+};
 
 app.configure(function(){
     app.set('views', __dirname + '/views');
     app.set('view engine', 'jade');
 });
 
-app.get('/publish', function(req, res){
-    res.send('Published');
+app.post('/publish', function(req, res){
+    res.send({result:'Published'});
     publisher.publish({
         sessionId: 1,
         foo: new Date()});
 });
 
 app.get('/pos', function(req, res){
-    //res.render('pos');
-    res.send('Buttons');
+    res.render('pos', { title: "POS"});
 });
 
-socketioserver.sockets.on('connection', function (connection) {
+io.sockets.on('connection', function (connection) {
 
     publisher.publish = function (msg) {
         console.log(msg);
         //connection.send(msg.data.toString());
-        socketioserver.sockets.in(msg.sessionId).send(msg.foo);
+        io.sockets.in(msg.sessionId).send(msg.foo);
     };
 
 //    socket.get('sessionId', function (err, name) {
@@ -58,13 +49,13 @@ socketioserver.sockets.on('connection', function (connection) {
 });
 
 app.get('/monitor', function (req, res) {
-    var path = URL.parse(req.url).pathname;
-        res.sendfile(__dirname + '/index.html');
+    res.sendfile(__dirname + '/index.html');
 });
 
-server.listen(8083);
+var port = 8083;
+server.listen(port);
+console.log("Listening on port " + port);
 
 function generateUUID() {
     return 1;
 }
-
