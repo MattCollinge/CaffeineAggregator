@@ -11,16 +11,15 @@ app.configure(function(){
     app.set('view engine', 'jade');
 });
 
-app.get('/publish', function(req, res){
-    res.send('Published');
+app.post('/publish', function(req, res){
+    res.send({result:'Published'});
     publisher.publish({
         sessionId: 1,
         foo: new Date()});
 });
 
 app.get('/pos', function(req, res){
-    //res.render('pos');
-    res.send('Buttons');
+    res.render('pos', { title: "POS"});
 });
 
 io.sockets.on('connection', function (connection) {

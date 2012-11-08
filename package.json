@@ -6,7 +6,8 @@
   "dependencies": {
     "express": "~3.0.1",
     "http": "~0.0.0",
-    "socket.io": "~0.9.11"
+    "socket.io": "~0.9.11",
+    "jade": "~0.27.7"
   },
   "devDependencies": {},
   "scripts": {
