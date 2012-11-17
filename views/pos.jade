@@ -7,5 +7,6 @@ block content
     h1
       | POS
     div
-      a(href='#', id='coffee', class='pos-action btn btn-large btn-block')
-        | coffee
+      each drink in drinks
+        a(href='#', id='#{drink.id}', class='pos-action btn btn-large btn-block')
+          = drink.id
