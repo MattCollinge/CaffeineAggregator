@@ -1,26 +1,12 @@
 extends layout
 
 block append head
-  script
-    $(function() {
-      $('#coffee').click(function() {
-        $.post('/publish');
-        return false;
-      });
-    });
-  style
-    .button {
-      padding: 20px;
-      font-size: 20px;
-      display: inline-block;
-      border-radius: 5px;
-      border: solid 1px silver;
-      background-color: silver;
-      text-decoration: none;
-      color: white;
-    }
 
 block content
-  div
-    a(href='#',id='coffee', class='button')
-      | coffee
+  .container
+    h1
+      | POS
+    div
+      each drink in drinks
+        a(href='#', id='#{drink.id}', class='pos-action btn btn-large btn-block')
+          = drink.id
