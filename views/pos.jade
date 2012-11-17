@@ -1,18 +1,11 @@
 extends layout
 
 block append head
-  script
-    $(function() {
-      $('#coffee').click(function() {
-        $.post('/publish');
-        return false;
-      });
-    });
 
 block content
   .container
     h1
       | POS
     div
-      a(href='#',id='coffee', class='btn btn-large btn-block')
+      a(href='#', id='coffee', class='btn btn-large btn-block')
         | coffee
