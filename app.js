@@ -21,11 +21,13 @@ app.configure(function(){
 
 app.post('/publish', function(req, res){
     res.send({result:'Published'});
-    publisher.publish({
+    var event = {
+        sender: req.ip,
         sessionId: 1,
         stamp: new Date(),
-        drink: req.body.drink});
-        pushEventIntoStore(req);
+        drink: req.body.drink
+    }
+    storeAndPublishEvent(event);
 });
 
 app.get('/pos', function(req, res){
@@ -38,19 +40,10 @@ io.sockets.on('connection', function (connection) {
         //connection.send(msg);
         io.sockets.in(msg.sessionId).emit('purchase',msg);
     };
-
-//    socket.get('sessionId', function (err, name) {
-//        console.log('message for ', name);
-//    });
-
-    // connection.on('set nickname', function (name) {
-    var sessionId = generateUUID(); //connection.handshake.sessionID;
-//    connection.set('sessionId', sessionId, function () {
+    var sessionId = generateUUID(); 
     console.log('Setting sessionId: ' + sessionId);
     connection.emit('sessionId', sessionId);
     connection.emit('status','ready');
-//    });
-
     connection.join(sessionId);
 
 });
@@ -67,25 +60,19 @@ function generateUUID() {
     return 1;
 }
 
-function pushEventIntoStore(event) {
+function storeAndPublishEvent(event) {
     console.log("pushingEventIntoStore");
-    
-    var data = {
-        sender: event.ip,
-        time: new Date()
-    };
 
     es.postEvent({
-        data: data,
+        data: event,
         stream: "caffine-drinks",
         eventType: "DrinkPurchased",
         success: function () {
-            publisher.publish({
-                sessionId: "IHavePublishedAnEvent",
-                foo: new Date()
-            });
+            console.log("publishing event");
+            publisher.publish(event);
         },
         error: function(error, eventId, correlationId, expectedVersion){
+                console.log("Error occurred");
                 publisher.publish({
                     sessionId: "IHaveNotPublishedAnEvent",
                     foo: error + " " + eventId + " " + correlationId + " " +expectedVersion
