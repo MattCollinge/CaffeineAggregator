@@ -37,7 +37,11 @@
         return msg.replace(/</g, '&lt;').replace(/>/g, '&gt;');
     };
 
-    conn.on('message', function (obj) {
+    conn.on('purchase', function (obj) {
+        message('Served ' +  obj.drink + ' at '+ obj.stamp);
+    });
+
+    conn.on('status', function (obj) {
         message(obj);
     });
 

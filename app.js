@@ -1,8 +1,12 @@
-var app = require('express')();
+var express = require('express');
+var app = express();
 var http = require('http');
 var server = http.createServer(app);
+
 var io = require('socket.io').listen(server);
 var es = require('./es/es.api');
+
+var drinks = [{ id: 'coffee'}, {id: 'coke'}];
 
 var publisher = {
     publish: function(){}
@@ -11,27 +15,28 @@ var publisher = {
 app.configure(function(){
     app.set('views', __dirname + '/views');
     app.set('view engine', 'jade');
+    app.use(express.static(__dirname + '/static'));
+    app.use(express.bodyParser());
 });
 
 app.post('/publish', function(req, res){
     res.send({result:'Published'});
     publisher.publish({
         sessionId: 1,
-        foo: new Date()});
-
-    pushEventIntoStore(req);
+        stamp: new Date(),
+        drink: req.body.drink});
+        pushEventIntoStore(req);
 });
 
 app.get('/pos', function(req, res){
-    res.render('pos', { title: "POS"});
+    res.render('pos', { title: "POS", drinks: drinks});
 });
 
 io.sockets.on('connection', function (connection) {
 
     publisher.publish = function (msg) {
-        console.log(msg);
-        //connection.send(msg.data.toString());
-        io.sockets.in(msg.sessionId).send(msg.foo);
+        //connection.send(msg);
+        io.sockets.in(msg.sessionId).emit('purchase',msg);
     };
 
 //    socket.get('sessionId', function (err, name) {
@@ -43,12 +48,10 @@ io.sockets.on('connection', function (connection) {
 //    connection.set('sessionId', sessionId, function () {
     console.log('Setting sessionId: ' + sessionId);
     connection.emit('sessionId', sessionId);
-    connection.send('ready');
+    connection.emit('status','ready');
 //    });
 
     connection.join(sessionId);
-
-    // });
 
 });
 
