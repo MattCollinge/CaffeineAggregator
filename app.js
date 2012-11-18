@@ -1,6 +1,8 @@
 var app = require('express')();
-var server = require('http').createServer(app);
+var http = require('http');
+var server = http.createServer(app);
 var io = require('socket.io').listen(server);
+var es = require('./es/es.api');
 
 var publisher = {
     publish: function(){}
@@ -16,6 +18,8 @@ app.post('/publish', function(req, res){
     publisher.publish({
         sessionId: 1,
         foo: new Date()});
+
+    pushEventIntoStore(req);
 });
 
 app.get('/pos', function(req, res){
@@ -58,4 +62,31 @@ console.log("Listening on port " + port);
 
 function generateUUID() {
     return 1;
+}
+
+function pushEventIntoStore(event) {
+    console.log("pushingEventIntoStore");
+    
+    var data = {
+        sender: event.ip,
+        time: new Date()
+    };
+
+    es.postEvent({
+        data: data,
+        stream: "caffine-drinks",
+        eventType: "DrinkPurchased",
+        success: function () {
+            publisher.publish({
+                sessionId: "IHavePublishedAnEvent",
+                foo: new Date()
+            });
+        },
+        error: function(error, eventId, correlationId, expectedVersion){
+                publisher.publish({
+                    sessionId: "IHaveNotPublishedAnEvent",
+                    foo: error + " " + eventId + " " + correlationId + " " +expectedVersion
+                });
+        }
+    });
 }
