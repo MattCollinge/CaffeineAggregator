@@ -1,0 +1,12 @@
+extends layout
+
+block append head
+ script(src='/socket.io/socket.io.js', charset='utf-8')
+ script(src='js/monitor.js', charset='utf-8')
+
+block content
+  .container
+    h1.
+      Caffine Monitor
+    #chat
+      

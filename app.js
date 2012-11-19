@@ -34,6 +34,10 @@ app.get('/pos', function(req, res){
     res.render('pos', { title: "POS", drinks: drinks});
 });
 
+app.get('/monitor', function(req, res){
+    res.render('monitor', { title: "POS", drinks: drinks});
+});
+
 io.sockets.on('connection', function (connection) {
 
     publisher.publish = function (msg) {
@@ -46,10 +50,6 @@ io.sockets.on('connection', function (connection) {
     connection.emit('status','ready');
     connection.join(sessionId);
 
-});
-
-app.get('/monitor', function (req, res) {
-    res.sendfile(__dirname + '/index.html');
 });
 
 var port = 8083;

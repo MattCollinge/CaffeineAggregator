@@ -1,0 +1,172 @@
+{
+	"auto_complete":
+	{
+		"selected_items":
+		[
+		]
+	},
+	"buffers":
+	[
+		{
+			"contents": "fromAll().foreachStream().whenAny(function(state,event) {\n	//filter out system streams\n	if(event.streamId.indexOf(\"$\") != 0)\n	{\n		var type = event.eventType;\n		//probably dont want to log types like $stream-created\n		if(type.indexOf(\"$\") != 0)\n		{\n			if(state[type])\n			{\n				state[type]++;\n			} else {\n				state[type] = 1;\n			}\n		}\n	}\n\n	return state;\n});\n\nhttp://localhost:2113/projection/{projection name}/state?partition={your user stream id}\n\nhttp://192.168.0.118:2113/projection/CountByEventType/state?partition=caffine-drinks\n\ncurl http://192.168.0118:2113/projection/CountByEventType/state -H \"Accept: application/json\" -i\n\n/*\n- one-time -- runs once until end-of-transaction-file/then stop/then remove from memory on timeout \n- ad-hoc -- runs in memory until the node is restarted (nothing is written to any stream/data are available via http only)\n- continuous -- runs cross node restarts; definition is stored in the system stream; automatically restarts on node restart from the last checkpoint; automatically writes checkpoints to the system stream; state is available via http;\n- persistent -- the same as continuous, but: on any state change emits StateUpdated event to the $projections-{name}-state stream (configurable) and support emit()/linkTo() statements; state is available via http and from the $projections-{name}-state\n\nforeachStream() projections are only supported in persistent mode and they maintain multiple -state streams: $projections-{name}-{streamname}--state\n*/",
+			"file": "es/projectionSimple.js",
+			"file_size": 629,
+			"file_write_time": 129978194770774324,
+			"settings":
+			{
+				"buffer_size": 1495,
+				"line_ending": "Unix"
+			}
+		}
+	],
+	"build_system": "",
+	"command_palette":
+	{
+		"height": 0.0,
+		"selected_items":
+		[
+		],
+		"width": 0.0
+	},
+	"console":
+	{
+		"height": 0.0
+	},
+	"distraction_free":
+	{
+		"menu_visible": true,
+		"show_minimap": false,
+		"show_open_files": false,
+		"show_tabs": false,
+		"side_bar_visible": false,
+		"status_bar_visible": false
+	},
+	"file_history":
+	[
+		"/C/Users/mcollinge/AppData/Roaming/Subversion/servers"
+	],
+	"find":
+	{
+		"height": 0.0
+	},
+	"find_in_files":
+	{
+		"height": 0.0,
+		"where_history":
+		[
+		]
+	},
+	"find_state":
+	{
+		"case_sensitive": false,
+		"find_history":
+		[
+		],
+		"highlight": true,
+		"in_selection": false,
+		"preserve_case": false,
+		"regex": false,
+		"replace_history":
+		[
+		],
+		"reverse": false,
+		"show_context": true,
+		"use_buffer2": true,
+		"whole_word": false,
+		"wrap": true
+	},
+	"groups":
+	[
+		{
+			"selected": 0,
+			"sheets":
+			[
+				{
+					"buffer": 0,
+					"file": "es/projectionSimple.js",
+					"settings":
+					{
+						"buffer_size": 1495,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								634,
+								634
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/JavaScript/JavaScript.tmLanguage",
+							"translate_tabs_to_spaces": false
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				}
+			]
+		}
+	],
+	"incremental_find":
+	{
+		"height": 0.0
+	},
+	"input":
+	{
+		"height": 0.0
+	},
+	"layout":
+	{
+		"cells":
+		[
+			[
+				0,
+				0,
+				1,
+				1
+			]
+		],
+		"cols":
+		[
+			0.0,
+			1.0
+		],
+		"rows":
+		[
+			0.0,
+			1.0
+		]
+	},
+	"menu_visible": true,
+	"replace":
+	{
+		"height": 0.0
+	},
+	"save_all_on_build": true,
+	"select_file":
+	{
+		"height": 0.0,
+		"selected_items":
+		[
+		],
+		"width": 0.0
+	},
+	"select_project":
+	{
+		"height": 0.0,
+		"selected_items":
+		[
+		],
+		"width": 0.0
+	},
+	"show_minimap": true,
+	"show_open_files": false,
+	"show_tabs": true,
+	"side_bar_visible": true,
+	"side_bar_width": 150.0,
+	"status_bar_visible": true
+}

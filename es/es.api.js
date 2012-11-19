@@ -40,7 +40,7 @@ exports.postEvent = function (settings) {
     //var url =  + encodedStream;
     
     var options = {
-        hostname: "192.168.0.118",
+        hostname: "127.0.0.1",
         port: 2113,
         path: "/streams/" + encodedStream,
         method: "POST",
