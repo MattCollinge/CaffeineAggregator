@@ -37,8 +37,7 @@ exports.postEvent = function (settings) {
     
     var bodyStr = JSON.stringify(body);
     var encodedStream = encodeURIComponent(stream);
-    //var url =  + encodedStream;
-    
+   
     var options = {
         hostname: "127.0.0.1",
         port: 2113,

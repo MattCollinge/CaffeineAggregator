@@ -19,8 +19,11 @@ app.configure(function(){
     app.use(express.bodyParser());
 });
 
+var port = 8083;
+server.listen(port);
+console.log("Listening on port " + port);
+
 app.post('/publish', function(req, res){
-    res.send({result:'Published'});
     var event = {
         sender: req.ip,
         sessionId: 1,
@@ -28,6 +31,7 @@ app.post('/publish', function(req, res){
         drink: req.body.drink
     }
     storeAndPublishEvent(event);
+    res.send({result:'Published'});
 });
 
 app.get('/pos', function(req, res){
@@ -35,30 +39,15 @@ app.get('/pos', function(req, res){
 });
 
 app.get('/monitor', function(req, res){
-    res.render('monitor', { title: "POS", drinks: drinks});
+    res.render('monitor');
 });
 
 io.sockets.on('connection', function (connection) {
-
     publisher.publish = function (msg) {
-        //connection.send(msg);
-        io.sockets.in(msg.sessionId).emit('purchase',msg);
+        io.sockets.emit('purchase',msg);
     };
-    var sessionId = generateUUID(); 
-    console.log('Setting sessionId: ' + sessionId);
-    connection.emit('sessionId', sessionId);
-    connection.emit('status','ready');
-    connection.join(sessionId);
-
+   connection.emit('status','ready');
 });
-
-var port = 8083;
-server.listen(port);
-console.log("Listening on port " + port);
-
-function generateUUID() {
-    return 1;
-}
 
 function storeAndPublishEvent(event) {
     console.log("pushingEventIntoStore");
