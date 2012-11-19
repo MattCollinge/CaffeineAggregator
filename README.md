@@ -17,26 +17,26 @@ Latest build at time of writing: [stuff](https://github.com/downloads/EventStore
 
 5) Enter _CountByEventType_ for the Name and this code in the source input:
 
-'''javascript
-fromAll().foreachStream().whenAny(function(state,event) {
-	//filter out system streams
-	if(event.streamId.indexOf("$") != 0)
-	{
-		var type = event.eventType;
-		//probably dont want to log types like $stream-created
-		if(type.indexOf("$") != 0)
-		{
-			if(state[type])
-			{
-				state[type]++;
-			} else {
-				state[type] = 1;
-			}
-		}
-	}
+    '''javascript
+    fromAll().foreachStream().whenAny(function(state,event) {
+	    //filter out system streams
+	    if(event.streamId.indexOf("$") != 0)
+	    {
+	    	var type = event.eventType;
+		    //probably dont want to log types like $stream-created
+		    if(type.indexOf("$") != 0)
+		    {
+			    if(state[type])
+			    {
+			    	state[type]++;
+			    } else {
+			    	state[type] = 1;
+			    }
+		    }
+	    }
 
-	return state;
-});
-'''
+	    return state;
+    });
+    '''
 
 6) Fire up Node, order some drinks then go to: [stuff](http://localhost:2113/projection/CountByEventType/state?partition=caffine-drinks) and see how many drinks have been ordered...
