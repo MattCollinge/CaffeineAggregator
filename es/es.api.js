@@ -67,7 +67,7 @@ exports.postEvent = function (settings) {
 
     req.write(bodyStr);
     req.end();
-    console.log("Sent Event to EventStore");
+    console.log("Sending Event to EventStore");
 
     function S4() {
         return (((1 + Math.random()) * 0x10000) | 0).toString(16).substring(1);

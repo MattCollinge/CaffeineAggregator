@@ -9,4 +9,7 @@ block content
     h1.
       Caffine Monitor
     #chat
-      
+   
+   div
+      each event in stream
+       li #{event.location} : #{JSON.stringify(event.event)}

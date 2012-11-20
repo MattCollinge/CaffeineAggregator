@@ -38,8 +38,22 @@ app.get('/pos', function(req, res){
     res.render('pos', { title: "POS", drinks: drinks});
 });
 
+
+var projection = require('./es/emitProjectionSpike');
+var stream = [{location: '/streams/TimeSeries1', 
+        event: {
+            TimeBucket: new Date(),
+            Count: 1
+            }}];
+
 app.get('/monitor', function(req, res){
-    res.render('monitor');
+    res.render('monitor',  { title: "Monitor", stream: projection.tryEmit()});
+});
+
+
+app.get('/project', function(req, res){
+    res.render('monitor', { title: "Monitor", stream: stream});
+    //stream: projection.tryEmit()});
 });
 
 io.sockets.on('connection', function (connection) {
