@@ -46,7 +46,10 @@ return outputStream;
 
 function GetNextPeriod(sampleDate)
 {
-	return new Date(sampleDate.getTime() + 5*60000);
+	var periodSize = 5*60000;
+	var msPastLastPeriod = sampleDate.getTime() % periodSize;
+
+	return new Date(sampleDate.getTime() - msPastLastPeriod + periodSize);
 }
 
 var project = function(state,event, emit){ 
@@ -63,11 +66,11 @@ var project = function(state,event, emit){
 			}
 	// 	}
 	// }
-	if(event.stamp > state.period)
+	if(event.stamp.getTime() > state.period.getTime())
 	{
 		emit('/streams/TimeSeries1', 
 			{
-				TimeBucket: state.period,
+				PeriodEnding: state.period,
 				Count: state.count
 			});
 
@@ -76,3 +79,139 @@ var project = function(state,event, emit){
 	}
 	return state; 
 }
+
+
+
+//ES Projection:::
+/*
+fromAll().when({DrinkServed: function(state,event) { 
+
+function GetNextPeriod(sampleDate)
+{
+	var periodSize = 5*60000;
+	var msPastLastPeriod = sampleDate.getTime() % periodSize;
+
+	return new Date(sampleDate.getTime() - msPastLastPeriod + periodSize);
+}
+
+ if(event.streamId.indexOf("$") != 0)
+ 	{
+log(JSON.stringify(event));
+if(state)
+			{
+				state.count ++;
+			} else {
+   			state = {period: GetNextPeriod(new Date(event.body.stamp)), count: 1};
+			}
+   
+	if(new Date(event.body.stamp).getTime() > new Date(state.period).getTime())
+	{
+		emit('/streams/CaffineTimeSeries5M', 
+			{
+				PeriodEnding: state.period,
+				Count: state.count
+			});
+
+			state.period = GetNextPeriod(new Date(event.body.stamp));
+			state.count = 0;
+	}
+}
+
+	return state;
+}});
+
+
+//=====
+
+fromAll().when({DrinkServed: function(state,event) { 
+
+function GetNextPeriod(sampleDate)
+{
+	var periodSize = 5*60000;
+	var msPastLastPeriod = sampleDate.getTime() % periodSize;
+
+	return new Date(sampleDate.getTime() - msPastLastPeriod + periodSize);
+}
+
+ if(event.streamId.indexOf("$") != 0)
+ 	{
+log(JSON.stringify(event));
+if(state)
+			{
+				state.count ++;
+			} else {
+   			state = {period: GetNextPeriod(new Date(event.body.stamp)), count: 1};
+			}
+   
+	if(new Date(event.body.stamp).getTime() > new Date(state.period).getTime())
+	{
+		linkTo('CaffineTimeSeries-5Min', 
+			{
+				periodEnding: state.period,
+				frequency: state.count
+			});
+
+			state.period = GetNextPeriod(new Date(event.body.stamp));
+			state.count = 0;
+	}
+}
+
+	return state;
+}});
+
+fromStream("DrinkTimeSeries-5").when( function(state,event) { 
+	if(event.eventType.indexOf("5MinAgg") != 0)
+	{
+		if(state.data){
+			state.data.push(
+				{"periodEnding": event.periodEnding,
+				"frequency": event.frequency
+				});
+		}
+		else
+		{ 
+			state.data = [];
+			state.data.push(
+				{"periodEnding": event.periodEnding,
+				"frequency": event.frequency
+				});
+		}
+	}
+	return state; 
+});
+
+
+//All in one projection...
+
+fromAll().when({ADrinkServed: function(state,event) { 
+
+function GetNextPeriod(sampleDate)
+{
+	var periodSize = 5*60000;
+	var msPastLastPeriod = sampleDate.getTime() % periodSize;
+
+	return new Date(sampleDate.getTime() - msPastLastPeriod + periodSize);
+}
+
+ if(event.streamId.indexOf("$") != 0)
+ {
+var thisPeriod = GetNextPeriod(new Date(event.body.stamp));
+
+if(!state.series)
+{
+state.series = {};
+}
+
+	if(state.series[thisPeriod])
+	{
+log("Found Period");
+		state.series[thisPeriod].count ++;
+	} else {
+log("Didn't find Period");
+		state.series[thisPeriod] = {'period': thisPeriod, 'count': 1};
+	}
+   }
+	return state;
+}}); 
+*/
+                    

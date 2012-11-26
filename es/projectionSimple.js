@@ -45,3 +45,48 @@ from_all().when_any(
 );
 
 fromCategory('user').foreachStream().when({})
+
+
+//=============
+
+//The projection below would be found at (stream of events that relate to creating and updating projections): http://127.0.0.1:2113/streams/$projections-CaffineTimeSeries5M
+//projection state at: http://127.0.0.1:2113/streams/$projections-CaffineTimeSeries5M-state
+	//eg for state change no 43: http://127.0.0.1:2113/streams/$projections-CaffineTimeSeries5M-state/event/43?format=json
+//The emitted Stream at: http://127.0.0.1:2113/streams/DrinkTimeSeries-5
+	//eg for event no 3: http://127.0.0.1:2113/streams/DrinkTimeSeries-5/event/3?format=json
+
+fromAll().when({ADrinkServed: function(state,event) { 
+
+function GetNextPeriod(sampleDate)
+{
+	var periodSize = 5*60000;
+	var msPastLastPeriod = sampleDate.getTime() % periodSize;
+
+	return new Date(sampleDate.getTime() - msPastLastPeriod + periodSize);
+}
+
+ if(event.streamId.indexOf("$") != 0)
+ {
+	if(state)
+	{
+		state.count ++;
+	} else {
+		state = {'period': GetNextPeriod(new Date(event.body.stamp)), 'count': 1};
+	}
+   
+	if(new Date(event.body.stamp).getTime() > new Date(state.period).getTime())
+	{
+		var newEvent = {'periodEnding': state.period,
+				 'frequency': state.count
+				};
+			
+		emit('DrinkTimeSeries-5', "5MinAgg", newEvent);
+
+		state.period = GetNextPeriod(new Date(event.body.stamp));
+		state.count = 0;
+	}
+}
+
+	return state;
+}});
+                              
