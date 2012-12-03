@@ -1,4 +1,4 @@
- function message(obj) {
+    function message(obj) {
         $('#chat').append('<p><em>' + esc(obj) + '</em></p>');
     	}
 
@@ -30,3 +30,50 @@
         sessionId = obj;
         message('Got sessionId from server:' + sessionId);
     });
+
+    conn.on('dataSeries', function(data){
+        renderGraph(data);
+    });
+
+
+    //Rickshaw.js - Charting
+    function renderGraph(data){
+        var graph = new Rickshaw.Graph( {
+                element: document.getElementById("chart"),
+                //width: 580,
+                height: 250,
+                series: [ {
+                        color: 'steelblue',
+                        data: data
+                }]
+        } );
+
+        var x_axis = new Rickshaw.Graph.Axis.Time( { graph: graph } );
+
+         var y_axis = new Rickshaw.Graph.Axis.Y( {
+            graph: graph,
+            orientation: 'left',
+            tickFormat: Rickshaw.Fixtures.Number.formatKMBT,
+            element: document.getElementById("y_axis")
+        } );
+
+        graph.render(); 
+    }
+
+    // // add some data every so often
+    // var tv = 1000;
+    // graph.series.setTimeInterval(tv);
+
+    // setInterval( function() {
+    //     var data = { This: 3 };
+    //     var randInt = Math.floor(Math.random()*100);
+    //     if (randInt > 10) {
+    //         data.That = randInt;
+    //     }
+    //     if (randInt > 15) {
+    //         data.TheOtherThing = randInt;
+    //     }
+
+    //     graph.series.addData(data);
+    //     graph.update();
+    // }, tv );

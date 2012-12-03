@@ -49,6 +49,7 @@ io.sockets.on('connection', function (connection) {
         io.sockets.emit('purchase',msg);
     };
    connection.emit('status','ready');
+   connection.emit('dataSeries',[ { x: 0, y: 40 }, { x: 1, y: 49 }, { x: 2, y: 87 }, { x: 3, y: 42 } ]);
 });
 
 function storeAndPublishEvent(event) {

@@ -3,13 +3,27 @@ extends layout
 block append head
  script(src='/socket.io/socket.io.js', charset='utf-8')
  script(src='js/monitor.js', charset='utf-8')
+ script(src='js/rickshaw/rickshaw.min.js', charset='utf-8')
+ script(src='js/rickshaw/vendor/d3.min.js', charset='utf-8')
+ script(src='js/rickshaw/vendor/d3.layout.min.js', charset='utf-8')
+
+ link(href='css/monitor.css', rel='stylesheet', media='screen')
+ link(href='css/rickshaw/rickshaw.min.css', rel='stylesheet', media='screen')
 
 block content
   .container
     h1.
       Caffine Monitor
-    #chat
    
+   #chart_container
+    #y_axis
+    #chart  
+
+   #chat
+
    div
       each event in stream
        li #{event.location} : #{JSON.stringify(event.event)}
+
+  //- script(type='text/javascript')
+  //-    renderGraph()
