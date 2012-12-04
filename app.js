@@ -6,7 +6,9 @@ var server = http.createServer(app);
 var io = require('socket.io').listen(server);
 var es = require('./es/es.api');
 
-var drinks = [{ id: 'coffee'}, {id: 'coke'}];
+var drinks = [{id: 'coffee-large', name: 'Large Coffee'},
+                {id: 'coffee-small', name: 'Small Coffee'},
+                {id: 'coke', name: 'Coke'}];
 
 var publisher = {
     publish: function(){}
@@ -24,9 +26,12 @@ server.listen(port);
 console.log("Listening on port " + port);
 
 app.post('/publish', function(req, res){
+    //TODO: Calculate volume in litres, grams of caffeine & lethal does for mongooses ;)
     var event = {
         sender: req.ip,
-        sessionId: 1,
+        volume: 0.2,
+        gofcaffeine: 1.2,
+        lethaldoses: 0.01,
         stamp: new Date(),
         drink: req.body.drink
     }
@@ -38,10 +43,8 @@ app.get('/pos', function(req, res){
     res.render('pos', { title: "POS", drinks: drinks});
 });
 
-var projection = require('./es/emitProjectionSpike');
-
 app.get('/monitor', function(req, res){
-    res.render('monitor',  { title: "Monitor", stream: projection.tryEmit()});
+    res.render('monitor',  { title: "Monitor"});
 });
 
 io.sockets.on('connection', function (connection) {
@@ -49,7 +52,8 @@ io.sockets.on('connection', function (connection) {
         io.sockets.emit('purchase',msg);
     };
    connection.emit('status','ready');
-   connection.emit('dataSeries',[ { x: 0, y: 40 }, { x: 1, y: 49 }, { x: 2, y: 87 }, { x: 3, y: 42 } ]);
+   //TODO: Get Projection from Event Store here and send to Monitor over websockets
+   connection.emit('dataSeries', getCaffeineDataSeries());
 });
 
 function storeAndPublishEvent(event) {
@@ -59,9 +63,10 @@ function storeAndPublishEvent(event) {
         data: event,
         stream: "caffine-drinks",
         eventType: "ADrinkServed",
-        metaData: {"$maxAge": 3600},
+        metaData: {},//"$maxAge": 3600},
         success: function () {
             console.log("publishing event");
+            //TODO: future: get new projection state and send to monitors over websockets...
             publisher.publish(event);
         },
         error: function(error, eventId, correlationId, expectedVersion){
@@ -72,4 +77,12 @@ function storeAndPublishEvent(event) {
                 });
         }
     });
+}
+
+function getCaffeineDataSeries(){
+   // return [ { x: 0, y: 40 }, { x: 1, y: 49 }, { x: 2, y: 87 }, { x: 3, y: 42 } ];
+   
+ return {"1": {"f":123, "litres":1.23, "g":3.4, "lethal":2},
+   "2": {"f":45, "litres":0.23, "g":0.4, "lethal":0.5},
+   "3": {"f":367, "litres":4.23, "g":13.4, "lethal":8}};
 }

@@ -34,8 +34,9 @@
     });
 
     conn.on('dataSeries', function(data){
-        setupKO(data);
-        renderGraph(data);
+        var rickshawData = transformData(data);
+        setupKO(rickshawData);
+        renderGraph(rickshawData);
     });
 
 
@@ -45,7 +46,7 @@
         this.lastName = "Bertington";
         this.firstName = ko.observable("Bob").extend({logChange: "first name"});
         this.fullName = ko.computed(function() {
-                                        return this.firstName() + " " + this.lastName();
+                                        return this.firstName() + " " + this.lastName;
                                     }, this);    
     }
 
@@ -69,14 +70,17 @@
    
     //Rickshaw.js - Charting
     function renderGraph(data){
+        
         var graph = new Rickshaw.Graph( {
                 element: document.getElementById("chart"),
+                renderer: 'bar',
                 //width: 580,
                 height: 250,
-                series: [ {
-                        color: 'steelblue',
-                        data: data
-                }]
+                series: data
+                // series: [ {
+                //         color: 'steelblue',
+                //         data: data
+                // }]
         } );
 
         var x_axis = new Rickshaw.Graph.Axis.Time( { graph: graph } );
@@ -89,22 +93,79 @@
         } );
 
         graph.render(); 
+
+        //fluff
+
+        var hoverDetail = new Rickshaw.Graph.HoverDetail( {
+            graph: graph
+        } );
+
+        var legend = new Rickshaw.Graph.Legend( {
+            graph: graph,
+            element: document.getElementById('legend')
+        } );
+
+        // var shelving = new Rickshaw.Graph.Behavior.Series.Toggle( {
+        //     graph: graph,
+        //     legend: legend
+        // } );
+
+        // var order = new Rickshaw.Graph.Behavior.Series.Order( {
+        //     graph: graph,
+        //     legend: legend
+        // } );
+
+        var highlighter = new Rickshaw.Graph.Behavior.Series.Highlight( {
+            graph: graph,
+            legend: legend
+        } );
+
+        //legend.shelving = shelving;
+
+        // add some data every so often
+        var tv = 1000;
+        setInterval( function() {
+            var newdata = data[0].data.pop();
+            newdata.y = newdata.y + 1;
+            data[0].data.push(newdata);
+            
+            newdata = data[1].data.pop();
+            newdata.y = newdata.y + 1;
+            data[1].data.push(newdata);
+            
+            newdata = data[2].data.pop();
+            newdata.y = newdata.y + 1;
+            data[2].data.push(newdata);
+
+            newdata = data[3].data.pop();
+            newdata.y = newdata.y + 1;
+            data[3].data.push(newdata);
+            
+            graph.update();
+        }, tv );
     }
 
-    // // add some data every so often
-    // var tv = 1000;
-    // graph.series.setTimeInterval(tv);
+function transformData(d) {
+    var data = [];
+    var metricCounts = {};
+    var palette = new Rickshaw.Color.Palette();
 
-    // setInterval( function() {
-    //     var data = { This: 3 };
-    //     var randInt = Math.floor(Math.random()*100);
-    //     if (randInt > 10) {
-    //         data.That = randInt;
-    //     }
-    //     if (randInt > 15) {
-    //         data.TheOtherThing = randInt;
-    //     }
+    Rickshaw.keys(d).sort().forEach( function(t) {
+        Rickshaw.keys(d[t]).forEach( function(metric) {
+            metricCounts[metric] = metricCounts[metric] || [];
+            metricCounts[metric].push( { x: parseFloat(t), y: d[t][metric] } );
+        } );
+    } );
 
-    //     graph.series.addData(data);
-    //     graph.update();
-    // }, tv );
+    Rickshaw.keys(metricCounts).sort().forEach( function(metric) {
+        data.push( {
+            name: metric,
+            data: metricCounts[metric],
+            color: palette.color()
+        } );
+    } );
+
+    Rickshaw.Series.zeroFill(data);
+    return data;
+}
+    
