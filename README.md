@@ -39,3 +39,21 @@ Latest build at time of writing: [Latest build](https://github.com/downloads/Eve
 
 
 6) Fire up Node, order some drinks then go to: http://localhost:2113/projection/CountByEventType/state?partition=caffine-drinks and see how many drinks have been ordered...
+
+
+curl -i -X POST --data-binary @./es/projections/drink-create-5min-stream.js http://127.0.0.1:2113/projections/persistent?name=drink-5mins&type=native:EventStore.Projections.Core.Standard.IndexStreams
+
+drink-5mins projections state can then be found here:
+http://127.0.0.1:2113/streams/$projections-drink-5mins-state?format=json
+latest eg: http://127.0.0.1:2113/streams/$projections-drink-5mins-state/event/7?format=json
+
+drink-timeseries-5 stream of emitted 5 min aggregates of events can be found here:
+http://127.0.0.1:2113/streams/drink-timeseries-5/event/6?format=json
+
+curl -i -X POST --data-binary @./es/projections/drink-agg-5min-stream.js http://127.0.0.1:2113/projections/persistent?name=drink-5mins-agg&type=native:EventStore.Projections.Core.Standard.IndexStreams
+
+drink-5mins-agg projections state can then be found here:
+http://127.0.0.1:2113/streams/$projections-drink-5mins-agg-state?format=json
+latest eg: http://127.0.0.1:2113/streams/$projections-drink-5mins-agg-state/event/7?format=json
+
+

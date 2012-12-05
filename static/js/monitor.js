@@ -34,7 +34,9 @@
     });
 
     conn.on('dataSeries', function(data){
+        console.log(data);
         var rickshawData = transformData(data);
+        console.log(rickshawData);
         setupKO(rickshawData);
         renderGraph(rickshawData);
     });

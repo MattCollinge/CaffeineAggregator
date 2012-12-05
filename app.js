@@ -27,6 +27,7 @@ console.log("Listening on port " + port);
 
 app.post('/publish', function(req, res){
     //TODO: Calculate volume in litres, grams of caffeine & lethal does for mongooses ;)
+    console.log('in publish...');
     var event = {
         sender: req.ip,
         volume: 0.2,
@@ -82,7 +83,8 @@ function storeAndPublishEvent(event) {
 function getCaffeineDataSeries(){
    // return [ { x: 0, y: 40 }, { x: 1, y: 49 }, { x: 2, y: 87 }, { x: 3, y: 42 } ];
    
- return {"1": {"f":123, "litres":1.23, "g":3.4, "lethal":2},
-   "2": {"f":45, "litres":0.23, "g":0.4, "lethal":0.5},
-   "3": {"f":367, "litres":4.23, "g":13.4, "lethal":8}};
+ return [{"t": 1, "f":123, "litres":1.23, "g":3.4, "lethal":2},
+   {"t":2, "f":45, "litres":0.23, "g":0.4, "lethal":0.5},
+   {"t":3, "f":367, "litres":4.23, "g":13.4, "lethal":8}
+   ];
 }
