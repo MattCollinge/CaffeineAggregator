@@ -54,7 +54,9 @@ io.sockets.on('connection', function (connection) {
     };
    connection.emit('status','ready');
    //TODO: Get Projection from Event Store here and send to Monitor over websockets
-   connection.emit('dataSeries', getCaffeineDataSeries());
+    getCaffeineDataSeries(function(timeSeries){
+        connection.emit('dataSeries', timeSeries);
+    });
 });
 
 function storeAndPublishEvent(event) {
@@ -80,11 +82,72 @@ function storeAndPublishEvent(event) {
     });
 }
 
-function getCaffeineDataSeries(){
+function getCaffeineDataSeries(callback){
    // return [ { x: 0, y: 40 }, { x: 1, y: 49 }, { x: 2, y: 87 }, { x: 3, y: 42 } ];
    
- return [{"t": 1, "f":123, "litres":1.23, "g":3.4, "lethal":2},
-   {"t":2, "f":45, "litres":0.23, "g":0.4, "lethal":0.5},
-   {"t":3, "f":367, "litres":4.23, "g":13.4, "lethal":8}
-   ];
+ // return {"1": {"f":123, "litres":1.23, "g":3.4, "lethal":2},
+ //   "2": {"f":45, "litres":0.23, "g":0.4, "lethal":0.5},
+ //   "3": {"f":367, "litres":4.23, "g":13.4, "lethal":8}};
+ var path = 'http://127.0.0.1:2113/streams/$projections-drink-5mins-agg-state?format=json';
+ 
+ var getProjectionState = function (res) {
+    var str = '';
+
+    //another chunk of data has been recieved, so append it to `str`
+    res.on('data', function (chunk) {
+        str += chunk;
+    });
+
+    //the whole response has been recieved, so we just print it out here
+    res.on('end', function () {
+        var projection = JSON.parse(str);
+        var projStateUri = '';
+        
+        console.log(JSON.stringify(projection.entries[0].links));
+            
+        projection.entries[0].links.forEach(function(link){ 
+            console.log(JSON.stringify(link));
+            if(link.type === 'application/json'){
+                projStateUri = link.uri;
+            }
+        });
+        getProjectionData(projStateUri, function(res){
+            var str = '';
+            res.on('data', function (chunk) {
+                str += chunk;
+            });
+            res.on('end', function () {
+                var projectionState = JSON.parse(str);
+                callback(projectionState.data.tsdata);
+            });
+        });
+    });
+    
+ }
+
+ getProjectionData(path, getProjectionState);
+
 }
+
+function getProjectionData(uri, onSuccess){
+ 
+    var req = http.request(uri, function(res)
+    {
+        console.log("STATUS: " + res.statusCode);
+        if(res.statusCode === 200)
+            onSuccess(res);
+        else
+            console.log("Status Code: " + res.statusCode);
+    });
+
+    req.on("error", function (error) 
+    {
+        console.log("Error occured: " + error + ', uri: ' + uri);
+        //onError(error);
+    });
+    req.setSocketKeepAlive();
+    req.end();
+    console.log("Requested Projection from EventStore: " + uri);
+
+}
+

@@ -105,12 +105,13 @@
         var legend = new Rickshaw.Graph.Legend( {
             graph: graph,
             element: document.getElementById('legend')
+
         } );
 
-        // var shelving = new Rickshaw.Graph.Behavior.Series.Toggle( {
-        //     graph: graph,
-        //     legend: legend
-        // } );
+        var shelving = new Rickshaw.Graph.Behavior.Series.Toggle( {
+            graph: graph,
+            legend: legend
+        } );
 
         // var order = new Rickshaw.Graph.Behavior.Series.Order( {
         //     graph: graph,
@@ -152,11 +153,19 @@ function transformData(d) {
     var metricCounts = {};
     var palette = new Rickshaw.Color.Palette();
 
-    Rickshaw.keys(d).sort().forEach( function(t) {
-        Rickshaw.keys(d[t]).forEach( function(metric) {
-            metricCounts[metric] = metricCounts[metric] || [];
-            metricCounts[metric].push( { x: parseFloat(t), y: d[t][metric] } );
-        } );
+    console.log(JSON.stringify(d));
+    
+    d.forEach(function(t){
+        console.log(JSON.stringify(t));
+        Rickshaw.keys(t).forEach(function(x){
+            console.log(JSON.stringify(x));
+            Rickshaw.keys(t[x]).forEach( function(metric) {
+                console.log(JSON.stringify(metric));
+                console.log(JSON.stringify(t[x][metric]));
+                    metricCounts[metric] = metricCounts[metric] || [];
+                metricCounts[metric].push( { x: parseFloat(new Date(x).getTime()), y: t[x][metric] || 0} );
+            });
+        });
     } );
 
     Rickshaw.keys(metricCounts).sort().forEach( function(metric) {
@@ -167,7 +176,9 @@ function transformData(d) {
         } );
     } );
 
+    //console.log(JSON.stringify(data));
     Rickshaw.Series.zeroFill(data);
+
     return data;
 }
     
