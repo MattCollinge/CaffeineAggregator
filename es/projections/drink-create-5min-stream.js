@@ -22,7 +22,7 @@ function resetState(eventDate){
  {
 	state.period = state.period || GetNextPeriod(new Date(event.body.stamp));
 
-	state.count ++;
+	state.count = state.count + 1 || 1;
 	state.volume = state.volume + event.body.volume || event.body.volume;
 	state.gofcaffeine = state.gofcaffeine + event.body.gofcaffeine || event.body.gofcaffeine;
 	state.lethaldoses = state.lethaldoses + event.body.lethaldoses || event.body.lethaldoses;
