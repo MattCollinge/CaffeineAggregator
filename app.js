@@ -21,7 +21,7 @@ app.configure(function(){
     app.use(express.bodyParser());
 });
 
-var port = 8083;
+var port = 80;
 server.listen(port);
 console.log("Listening on port " + port);
 
