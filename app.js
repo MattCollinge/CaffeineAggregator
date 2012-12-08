@@ -142,7 +142,7 @@ function getCaffeineDataSeries(callback){
  // return {"1": {"f":123, "litres":1.23, "g":3.4, "lethal":2},
  //   "2": {"f":45, "litres":0.23, "g":0.4, "lethal":0.5},
  //   "3": {"f":367, "litres":4.23, "g":13.4, "lethal":8}};
- var path = 'http://127.0.0.1:2113/streams/$projections-drink-5mins-agg-state?format=json';
+ var path = 'http://ec2-46-137-34-123.eu-west-1.compute.amazonaws.com:2113/streams/$projections-drink-5mins-agg-state?format=json';
  //http://127.0.0.1:2113/streams/$projections-drink-5mins-agg-state
  var getProjectionState = function (res) {
     var str = '';

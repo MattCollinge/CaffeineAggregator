@@ -1,5 +1,5 @@
     var attendeeCount = 19;
-    var conn = io.connect('http://ec2-46-137-34-123.eu-west-1.compute.amazonaws.com');
+    var conn = io.connect('ec2-46-137-34-123.eu-west-1.compute.amazonaws.com');
     var sessionId;
     var koModel;
     var rickshawData;

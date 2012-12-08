@@ -1,0 +1,79 @@
+Create AWS instance
+Security:
+22 (SSH) 0.0.0.0/0
+1113 0.0.0.0/0
+2113 0.0.0.0/0
+
+knife ec2 server create -I ami-ab9491df --flavor t1.micro -G EventStore -x ubuntu -N event-store -S ec2-eu-west-keypair --region eu-west-1 -Z eu-west-1a
+
+ssh ubuntu@ec2-46-137-34-123.eu-west-1.compute.amazonaws.com
+
+sudo apt-get update
+sudo apt-get install git
+mkdir src
+
+sudo apt-get install mono-complete --assume-yes
+
+OR..... (http://www.mono-project.com/Compiling_Mono_From_Git)
+
+sudo apt-get install build-essential
+sudo apt-get install autoconf
+sudo apt-get install libtool
+sudo apt-get install gettext
+sudo apt-get install subversion
+
+cd src
+git clone git://github.com/mono/mono.git
+cd mono
+./autogen.sh --prefix=/usr/local
+make
+make install
+
+# make EXTERNAL_MCS=/foo/bar/gmcs.exe EXTERNAL_RUNTIME=/somewhere/else/mono
+
+# ./autogen.sh must be run prior to this
+make get-monolite-latest
+make EXTERNAL_MCS="${PWD}/mcs/class/lib/monolite/gmcs.exe"
+
+
+cd src
+git clone https://github.com/EventStore/EventStore.git EventStore
+cd EventStore
+git checkout -b localdev remotes/origin/dev
+
+src/EventStore/Scripts/v8/get-v8.sh
+src/EventStore/Scripts/v8/build-v8.sh
+src/EventStore/Scripts/v8/build-js1.sh
+
+xbuild src/EventStore/EventStore.sln
+
+
+#git revert 893504fc0fde1dbf3b8cfdf157b3e60c2aa8b247
+
+ifconfig
+
+mono --gc=sgen bin/eventstore/debug/anycpu/EventStore.SingleNode.exe -c 0 --ip 10.56.97.95 -h 2113 -t 1113 --prefixes http://ec2-46-137-34-123.eu-west-1.compute.amazonaws.com:2113/
+
+
+curl -L http://github.com/MattCollinge/CaffeineAggregator/archive/master.tar.gz | tar zx
+apt-get install nodejs
+apt-get install npm
+cd /src/CaffieneAggregator-master
+npm install
+sudo npm install forever -g
+sudo forever -a -l CAgg-log -o  CAgg-out -e  CAgg-err start app.js 
+
+export LD_LIBRARY_PATH=/home/ubuntu/src/EventStore/bin/eventstore/debug/anycpu/
+
+//Set up db dir
+sudo chmod o=rwx /var
+mkdir /var/eventstore
+sudo chmod o=rx /var
+
+curl -i -X POST --data-binary @./es/projections/drink-create-5min-stream.js http://ec2-46-137-34-123.eu-west-1.compute.amazonaws.com:2113/projections/persistent?name=drink-5mins&type=native:EventStore.Projections.Core.Standard.IndexStreams
+
+curl -i -X POST --data-binary @./es/projections/drink-agg-5min-stream.js http://ec2-46-137-34-123.eu-west-1.compute.amazonaws.com:2113/projections/persistent?name=drink-5mins-agg&type=native:EventStore.Projections.Core.Standard.IndexStreams
+
+nohup mono --gc=sgen ~/src/EventStore/bin/eventstore/debug/anycpu/EventStore.SingleNode.exe -c 0 --ip 10.56.97.95 -h 2113 -t 1113 --prefixes http://ec2-46-137-34-123.eu-west-1.compute.amazonaws.com:2113/ --db /var/eventstore/data
+
+ssh -L 2113:ec2-46-137-34-123.eu-west-1.compute.amazonaws.com:2113 localhost
