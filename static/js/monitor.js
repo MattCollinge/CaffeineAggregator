@@ -1,56 +1,41 @@
-    function message(obj) {
-        $('#chat').append('<p><em>' + esc(obj) + '</em></p>');
-    	}
-
+    var attendeeCount = 19;
     var conn = io.connect('http://localhost:8083');
     var sessionId;
     var koModel;
-
-    function send(){
-        var val = document.getElementById('text').value;
-        conn.send(val);
-    }
-
-    function setSessionID() {
-        conn.emit('set nickname', 'blob');
-    }
-
-    function esc(msg){
-        return msg.replace(/</g, '&lt;').replace(/>/g, '&gt;');
-    };
+    var rickshawData;
 
     conn.on('purchase', function (obj) {
-        message('Served ' +  obj.drink + ' at '+ obj.stamp);
-        //koModel.firstName(JSON.stringify(obj));
-        //updateDataSeries(JSON.stringify(obj));
-    });
-
-    conn.on('status', function (obj) {
-        message(obj);
-    });
-
-    conn.on('sessionId', function(obj){
-        sessionId = obj;
-        message('Got sessionId from server:' + sessionId);
+        updateDataSeries(obj);
     });
 
     conn.on('dataSeries', function(data){
-        console.log(data);
-        rickshawData = transformData(data);
+        //console.log(JSON.stringify(data));
+        rickshawData = transformData(data.tsdata);
         console.log(rickshawData);
-        //setupKO(rickshawData);
+        setupKO(data);
         renderGraph(rickshawData);
     });
 
 
     //Knockout Model
     function AppViewModel(data) {
-        this.timeSeries = data;
-        this.lastName = "Bertington";
-        this.firstName = ko.observable("Bob").extend({logChange: "first name"});
-        this.fullName = ko.computed(function() {
-                                        return this.firstName() + " " + this.lastName;
-                                    }, this);    
+        this.timeSeries = data.tsdata;
+        this.drinks = ko.observable(data.totalNo);
+        this.mg = ko.observable(data.totalgrams.toFixed(0));
+        this.litres = ko.observable(data.totallitres.toFixed(2));
+        this.lethal = ko.observable(data.totallethal.toFixed(2));
+        this.mgPerAttendee = ko.computed(function() {
+                                        return (this.mg() / attendeeCount).toFixed(2);
+                                    }, this);
+
+        this.drinksPerAttendee = ko.computed(function() {
+                                        return (this.drinks() / attendeeCount).toFixed(2);
+                                    }, this);
+
+        // this.firstName = ko.observable("Bob").extend({logChange: "first name"});
+        // this.fullName = ko.computed(function() {
+        //                                 return this.firstName() + " " + this.lastName;
+        //                             }, this);    
     }
 
     function setupKO(data){
@@ -65,11 +50,8 @@
          koModel = new AppViewModel(data);
 
          // Activates knockout.js for DOM
-        //ko.applyBindings(koModel);
+        ko.applyBindings(koModel);
     }
-
-    
-var rickshawData;
    
     //Rickshaw.js - Charting
     function renderGraph(data){
@@ -77,7 +59,7 @@ var rickshawData;
         graph = new Rickshaw.Graph( {
                 element: document.getElementById("chart"),
                 renderer: 'bar',
-                //width: 580,
+                width: 580,
                 height: 250,
                 series: data
                 // series: [ {
@@ -119,94 +101,53 @@ var rickshawData;
         //     legend: legend
         // } );
 
-        var highlighter = new Rickshaw.Graph.Behavior.Series.Highlight( {
-            graph: graph,
-            legend: legend
-        } );
+        // var highlighter = new Rickshaw.Graph.Behavior.Series.Highlight( {
+        //     graph: graph,
+        //     legend: legend
+        // } );
+    }
 
-        //legend.shelving = shelving;
+    function getTimeStamp(lastStamp){
+        var periodSize = 5*60000;
+        var msPastLastPeriod = lastStamp.getTime() % periodSize;
 
-        // add some data every so often
-        // var tv = 1000;
-        // setInterval( function() {
-        //     var newdata = data[0].data.pop();
-        //     newdata.y = newdata.y + 1;
-        //     data[0].data.push(newdata);
-            
-        //     newdata = data[1].data.pop();
-        //     newdata.y = newdata.y + 1;
-        //     data[1].data.push(newdata);
-            
-        //     newdata = data[2].data.pop();
-        //     newdata.y = newdata.y + 1;
-        //     data[2].data.push(newdata);
+        return new Date(lastStamp.getTime() - msPastLastPeriod + periodSize);
 
-        //     newdata = data[3].data.pop();
-        //     newdata.y = newdata.y + 1;
-        //     data[3].data.push(newdata);
+    }
+
+    function updateMetric(seriesIndex, x, delta_y)
+    {
+            var oldPoint = rickshawData[seriesIndex].data.pop();
+            if(oldPoint.x === x){
+                rickshawData[seriesIndex].data.push({ x: x, y: oldPoint.y + delta_y});
+            }
+            else{
+                rickshawData[seriesIndex].data.push({x: oldPoint.x, y: oldPoint.y});
+                rickshawData[seriesIndex].data.shift();
+                rickshawData[seriesIndex].data.push({ x: x, y: delta_y});
+            }
             
-        //     graph.update();
-        // }, tv );
     }
 
     function updateDataSeries(state){
         console.log('incomming event: '+ JSON.stringify(state));
+        //console.log('incomming event: '+ JSON.parse(state).stamp);
 
-            var oldPoint = rickshawData[0].data.pop();
-            var x_time = new Date(state.stamp).getTime();
+            var x_time = getTimeStamp(new Date(state.stamp)).getTime()/1000;
             console.log(x_time);
-            console.log(oldPoint.x);
-            if(oldPoint.x === x_time){
-                //add to exisitng
-                oldPoint.y = oldPoint.y + 1;
-                rickshawData[0].data.push(oldPoint);
-            }
-            else{
-                //push back oldPoint, shift() oldest out the begining/top and push new in at end as is
-                rickshawData[0].data.push(oldPoint);
-                rickshawData[0].data.shift();
-                rickshawData[0].data.push({ x: parseFloat(x_time), y: 1});
-            } 
-
-            oldPoint = rickshawData[1].data.pop();
-            if(oldPoint.x === x_time){
-                //add to exisitng
-                oldPoint.y = oldPoint.y + 1;
-                rickshawData[1].data.push(oldPoint);
-            }
-            else{
-                //push back oldPoint, shift() oldest out the begining/top and push new in at end as is
-                rickshawData[1].data.push(oldPoint);
-                rickshawData[1].data.shift();
-                rickshawData[1].data.push({ x: parseFloat(x_time), y: state.volume || 0});
-            } 
-
-            oldPoint = rickshawData[2].data.pop();
-            if(oldPoint.x === x_time){
-                //add to exisitng
-                oldPoint.y = oldPoint.y + 1;
-                rickshawData[2].data.push(oldPoint);
-            }
-            else{
-                //push back oldPoint, shift() oldest out the begining/top and push new in at end as is
-                rickshawData[2].data.push(oldPoint);
-                rickshawData[2].data.shift();
-                rickshawData[2].data.push({ x: parseFloat(x_time), y: state.gofcaffeine || 0});
-            } 
-
-            oldPoint = rickshawData[3].data.pop();
-            if(oldPoint.x === x_time){
-                //add to exisitng
-                oldPoint.y = oldPoint.y + 1;
-                rickshawData[3].data.push(oldPoint);
-            }
-            else{
-                //push back oldPoint, shift() oldest out the begining/top and push new in at end as is
-                rickshawData[3].data.push(oldPoint);
-                rickshawData[3].data.shift();
-                rickshawData[3].data.push({ x: parseFloat(x_time), y: state.lethaldoses || 0});
-            } 
             
+            updateMetric(0, x_time, 1);
+            updateMetric(1, x_time, state.gofcaffeine);
+            updateMetric(2, x_time, state.lethaldoses);
+            updateMetric(3, x_time, state.volume);
+ 
+
+            graph.update();
+
+            koModel.drinks(koModel.drinks() + 1);
+            koModel.mg((new Number(koModel.mg()) + state.gofcaffeine).toFixed(0));
+            koModel.litres((new Number(koModel.litres()) + state.volume).toFixed(2));
+            koModel.lethal((new Number(koModel.lethal())+ state.lethaldoses).toFixed(2));
         //  Rickshaw.keys(state).forEach(function(t){
         //     var oldPoint = rickshawData[0].data.pop();
         //     var x_time = new Date(t).getTime();
@@ -229,7 +170,7 @@ var rickshawData;
 function transformData(d) {
     var data = [];
     var metricCounts = {};
-    var palette = new Rickshaw.Color.Palette();
+    var palette = new Rickshaw.Color.Palette('munin');
 
     console.log(JSON.stringify(d));
     
@@ -241,7 +182,7 @@ function transformData(d) {
                 //console.log(JSON.stringify(metric));
                 //console.log(JSON.stringify(t[x][metric]));
                     metricCounts[metric] = metricCounts[metric] || [];
-                metricCounts[metric].push( { x: parseFloat(new Date(x).getTime()), y: t[x][metric] || 0} );
+                metricCounts[metric].push( { x: new Date(x).getTime()/1000, y: t[x][metric] || 0} );
             });
         });
     } );
@@ -254,8 +195,8 @@ function transformData(d) {
         } );
     } );
 
-    //console.log(JSON.stringify(data));
-    Rickshaw.Series.zeroFill(data);
+    console.log(JSON.stringify(data));
+    //Rickshaw.Series.zeroFill(data);
 
     return data;
 }

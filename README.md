@@ -56,4 +56,10 @@ drink-5mins-agg projections state can then be found here:
 http://127.0.0.1:2113/streams/$projections-drink-5mins-agg-state?format=json
 latest eg: http://127.0.0.1:2113/streams/$projections-drink-5mins-agg-state/event/7?format=json
 
+On cloud:
 
+http://ec2-46-137-34-123.eu-west-1.compute.amazonaws.com/
+
+curl -i -X POST --data-binary @./es/projections/drink-create-5min-stream.js http://ec2-46-137-34-123.eu-west-1.compute.amazonaws.com:2113/projections/persistent?name=drink-5mins&type=native:EventStore.Projections.Core.Standard.IndexStreams
+
+curl -i -X POST --data-binary @./es/projections/drink-agg-5min-stream.js http://ec2-46-137-34-123.eu-west-1.compute.amazonaws.com/projections/persistent?name=drink-5mins-agg&type=native:EventStore.Projections.Core.Standard.IndexStreams

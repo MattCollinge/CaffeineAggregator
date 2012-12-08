@@ -12,3 +12,21 @@
         bottom: 0;
         width: 40px;
 }
+#legend {
+        display: absolute;
+        vertical-align: bottom;
+        margin: 50 50 50 10px;
+}
+
+p{
+	font-size: 1.5em;
+}
+
+span{
+	font-size: 1.1em;
+	color: green;
+}
+
+span.small{
+	font-size: 1em;
+}

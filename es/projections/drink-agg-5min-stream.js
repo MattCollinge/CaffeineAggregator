@@ -6,7 +6,7 @@ fromStream("drink-timeseries-5").whenAny( function(state,event) {
 		var lastStamp = new Date();
 		var arr = [];
 		var blank = {};
-		for(i=0;i<10;i++)
+		for(i=0;i<100;i++)
 		{
 			lastStamp = getTimeStamp(lastStamp);
 
@@ -35,10 +35,11 @@ fromStream("drink-timeseries-5").whenAny( function(state,event) {
 	if(event.eventType.indexOf("5MinAgg") === 0){
 		for (var key in event.body) {
   			if (event.body.hasOwnProperty(key)) {
-    			state.totalNo = state.totalNo + key.f || 0;
-				state.totalgrams = state.totalgrams + key.g || 0;
-				state.totallitres = state.totallitres + key.litres || 0;
-				state.totallethal = state.totallethal + key.lethal || 0;
+  				log('5MinAgg Event key:' + JSON.stringify(event.body[key]));
+    			state.totalNo = state.totalNo + event.body[key].f || 0;
+				state.totalgrams = state.totalgrams + event.body[key].g || 0;
+				state.totallitres = state.totallitres + event.body[key].litres || 0;
+				state.totallethal = state.totallethal + event.body[key].lethal || 0;
 			  }
 		}
 

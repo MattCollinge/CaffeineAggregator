@@ -28,14 +28,7 @@ console.log("Listening on port " + port);
 app.post('/publish', function(req, res){
     //TODO: Calculate volume in litres, grams of caffeine & lethal does for mongooses ;)
     console.log('in publish...');
-    var event = {
-        sender: req.ip,
-        volume: 0.2,
-        gofcaffeine: 1.2,
-        lethaldoses: 0.01,
-        stamp: new Date(),
-        drink: req.body.drink
-    }
+    var event = createEvent(req.ip, req.body.drink);
     storeAndPublishEvent(event);
     res.send({result:'Published'});
 });
@@ -58,6 +51,67 @@ io.sockets.on('connection', function (connection) {
         connection.emit('dataSeries', timeSeries);
     });
 });
+
+function sizeByDrinkType(drink){
+    var size;
+    switch(drink)
+    {
+        case 'coffee-large': 
+            size = 560;
+            break;
+        case 'coffee-small': 
+            size = 340;
+            break;
+        case 'coke':
+            size = 500;
+            break;
+        default:
+            size = 0;
+    }
+    return size/1000;
+}
+
+function gramsOfCaffeine(size, drink){
+    var g;
+    switch(drink)
+    {
+        case 'coffee-large': 
+            g = 157 * 3;
+            break;
+        case 'coffee-small': 
+            g = 157 * 2;
+            break;
+        case 'coke':
+            g = 96 * size;
+            break;
+        default:
+            g = 0;
+    }
+    return g;
+}
+
+function leathalDoses(g){
+    //80-150mg per kg. Mongoose weighes ~ 280g
+    lethalDoseForMongoose = 80 * 0.28;
+    return g / lethalDoseForMongoose;
+}
+
+function createEvent(ip, drink){
+
+   var size = sizeByDrinkType(drink);
+   var g = gramsOfCaffeine(size, drink);
+   var l = leathalDoses(g);
+
+   var event = {
+        sender: ip,
+        volume: size,
+        gofcaffeine: g,
+        lethaldoses: l,
+        stamp: new Date(),
+        drink: drink
+    }
+    return event;
+}
 
 function storeAndPublishEvent(event) {
     console.log("pushingEventIntoStore");
@@ -89,7 +143,7 @@ function getCaffeineDataSeries(callback){
  //   "2": {"f":45, "litres":0.23, "g":0.4, "lethal":0.5},
  //   "3": {"f":367, "litres":4.23, "g":13.4, "lethal":8}};
  var path = 'http://127.0.0.1:2113/streams/$projections-drink-5mins-agg-state?format=json';
- 
+ //http://127.0.0.1:2113/streams/$projections-drink-5mins-agg-state
  var getProjectionState = function (res) {
     var str = '';
 
@@ -118,7 +172,7 @@ function getCaffeineDataSeries(callback){
             });
             res.on('end', function () {
                 var projectionState = JSON.parse(str);
-                callback(projectionState.data.tsdata);
+                callback(projectionState.data);
             });
         });
     });
@@ -143,8 +197,8 @@ function getProjectionData(uri, onSuccess){
     req.on("error", function (error) 
     {
         console.log("Error occured: " + error + ', uri: ' + uri);
-        //onError(error);
     });
+
     req.setSocketKeepAlive();
     req.end();
     console.log("Requested Projection from EventStore: " + uri);

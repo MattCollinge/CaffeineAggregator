@@ -14,14 +14,44 @@ block append head
 
 block content
   .container
-    h1.
-      Caffine Monitor
-   
-   #chart_container
-    #chart
-    #legend_container
-     #smoother
-     #legend
-    #y_axis
+        h1.
+          Caffine Monitor
+        br
+        br
+      div(class='container-fluid')
+        #stats(class='row-fluid')
+           
+            #drinkcontainer(class='span4')
+                 div(class='row')
+                  div(class='span12')
+                    p Drinks Consumed:
+                      span(data-bind="text: drinks")
+                    small Drinks per Attendee:
+                    span 
+                     small(data-bind="text: drinksPerAttendee")
+                    p
 
-   #chat
+                 div(class='row')
+                  div(class='span12')
+                    p mg of Caffeine Consumed:
+                      span(data-bind="text: mg")
+                    small mg per Attendee:
+                    span 
+                     small(data-bind="text: mgPerAttendee")
+                    p
+
+                 div(class='row')
+                  div(class='span12')
+                    p Litres of Caffeine Consumed:
+                      span(data-bind="text: litres")
+                    small Leathal doses (mongoose):
+                    span 
+                     smallspan(data-bind="text: lethal")
+                      
+            div(class='span8')
+                #chart_container
+                 #chart
+                 #y_axis
+                #legend_container
+                #legend
+        
