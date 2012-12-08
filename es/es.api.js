@@ -39,7 +39,7 @@ exports.postEvent = function (settings) {
     var encodedStream = encodeURIComponent(stream);
    
     var options = {
-        hostname: "http://ec2-46-137-34-123.eu-west-1.compute.amazonaws.com",//"127.0.0.1",
+        hostname: "ec2-46-137-34-123.eu-west-1.compute.amazonaws.com",//"127.0.0.1",
         port: 2113,
         path: "/streams/" + encodedStream,
         method: "POST",
